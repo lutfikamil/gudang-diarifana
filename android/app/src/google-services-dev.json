@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "642699036603",
+    "project_id": "gudang-sppg-dev",
+    "storage_bucket": "gudang-sppg-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:642699036603:android:08a91160a447d3c146269e",
+        "android_client_info": {
+          "package_name": "com.example.gudangApp.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQlVHpunj0U90374uSq1G7UmXokQ1eLaI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

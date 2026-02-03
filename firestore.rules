@@ -1,0 +1,91 @@
+// Firestore Security Rules untuk Multi-Tenant Architecture
+// File: firestore.rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ================= HELPER FUNCTIONS =================
+    
+    // Validasi user adalah member dari tenant
+    function isUserInTenant(tenantId) {
+      return exists(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid));
+    }
+    
+    // Validasi user adalah owner/admin dari tenant
+    function isUserAdminInTenant(tenantId) {
+      let userRole = get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role;
+      return userRole in ['admin', 'owner'];
+    }
+    
+    // ================= ROOT COLLECTIONS =================
+    
+    // Users collection - setiap user bisa read/write user mereka sendiri
+    match /users/{userId} {
+      allow read: if request.auth.uid == userId;
+      allow write: if request.auth.uid == userId;
+      allow create: if request.auth.uid != null;
+    }
+    
+    // ================= TENANTS COLLECTION =================
+    
+    // Tenant metadata
+    match /tenants/{tenantId} {
+      allow read: if isUserInTenant(tenantId);
+      allow write: if isUserAdminInTenant(tenantId);
+    }
+    
+    // Tenant members subcollection
+    match /tenants/{tenantId}/members/{memberId} {
+      allow read: if isUserInTenant(tenantId);
+      allow write: if isUserAdminInTenant(tenantId);
+    }
+    
+    // ================= TENANT DATA COLLECTIONS =================
+    
+    // Barang collection - akses hanya untuk tenant members
+    match /tenants/{tenantId}/barang/{document=**} {
+      allow read: if isUserInTenant(tenantId);
+      allow create, update: if isUserInTenant(tenantId) && request.resource.data.tenantId == tenantId;
+      allow delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
+    }
+    
+    // Pesanan collection
+    match /tenants/{tenantId}/pesanan/{document=**} {
+      allow read: if isUserInTenant(tenantId);
+      allow create, update: if isUserInTenant(tenantId) && request.resource.data.tenantId == tenantId;
+      allow delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
+    }
+    
+    // Barang Masuk
+    match /tenants/{tenantId}/barang_masuk/{document=**} {
+      allow read, create: if isUserInTenant(tenantId);
+      allow update, delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
+    }
+    
+    // Barang Keluar
+    match /tenants/{tenantId}/barang_keluar/{document=**} {
+      allow read, create: if isUserInTenant(tenantId);
+      allow update, delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
+    }
+    
+    // Menu Kombinasi
+    match /tenants/{tenantId}/menu_kombinasi/{document=**} {
+      allow read: if isUserInTenant(tenantId);
+      allow create, update: if isUserInTenant(tenantId) && request.resource.data.tenantId == tenantId;
+      allow delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
+    }
+    
+    // Kategori Menu Kombinasi
+    match /tenants/{tenantId}/kategori_menu_kombinasi/{document=**} {
+      allow read: if isUserInTenant(tenantId);
+      allow create, update: if isUserInTenant(tenantId) && request.resource.data.tenantId == tenantId;
+      allow delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,4 @@
+#Tue Feb 03 00:22:34 WIB 2026
+base.0=/Data/gudang_app/build/app/intermediates/dex/release/minifyReleaseWithR8/classes.dex
+path.0=classes.dex
+renamed.0=classes.dex
