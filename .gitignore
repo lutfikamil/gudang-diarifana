@@ -4,11 +4,17 @@
 .packages
 pubspec.lock
 
+# Flutter build
+build/
+*.apk
+*.aab
+*.dill
+
 # Android
 android/.gradle/
 android/local.properties
-android/app/google-services.json
-
+android/app/src/google-services.json
+android/app/src/google-services-dev.json
 # iOS
 ios/Runner/GoogleService-Info.plist
 
