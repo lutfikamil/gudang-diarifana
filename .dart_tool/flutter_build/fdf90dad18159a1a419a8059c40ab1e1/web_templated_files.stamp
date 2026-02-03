@@ -1,1 +1,0 @@
-{"inputs":["/Data/gudang_app/web/*/index.html","/Data/gudang_app/web/flutter_bootstrap.js","/home/lutfi/Android/flutter-bundle/bin/internal/engine.version"],"outputs":["/Data/gudang_app/build/web/*/index.html","/Data/gudang_app/build/web/flutter_bootstrap.js"],"buildKey":"[{\"compileTarget\":\"dart2js\",\"renderer\":\"canvaskit\",\"mainJsPath\":\"main.dart.js\"}]"}
