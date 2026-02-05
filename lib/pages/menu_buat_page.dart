@@ -198,7 +198,7 @@ class _BuatMenuWidgetState extends State<BuatMenuWidget> {
                     },
                   ),
                 );
-              }).toList(),
+              }),
 
             const SizedBox(height: 24),
 

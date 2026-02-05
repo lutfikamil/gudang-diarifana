@@ -129,7 +129,7 @@ class _MenuLihatPageState extends State<MenuLihatPage> {
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Text("${entry.key}: ${entry.value}"),
                       );
-                    }).toList(),
+                    }),
                     const SizedBox(height: 12),
                   ],
                   const Text(
@@ -150,7 +150,7 @@ class _MenuLihatPageState extends State<MenuLihatPage> {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

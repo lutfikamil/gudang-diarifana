@@ -33,6 +33,22 @@ android {
         versionName = flutter.versionName
     }
 
+    flavorDimensions += listOf("env")
+
+    productFlavors {
+        create("dev") {
+            dimension = "env"
+            // Adds suffix so package id differs from prod. Adjust as needed.
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+        }
+
+        create("prod") {
+            dimension = "env"
+            // production flavor uses base applicationId
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
@@ -40,6 +56,16 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+}
+dependencies {
+  implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
+      implementation("com.google.firebase:firebase-auth")
+
+    // Also add the dependencies for the Credential Manager libraries and specify their versions
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+  implementation("com.google.firebase:firebase-auth")
 }
 
 flutter {

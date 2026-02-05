@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'firebase_options_dev.dart';
-import 'auth/login_page.dart';
+import 'auth/login_page_dev.dart';
 import 'pages/dashboard_page.dart';
 import 'services/auth_service.dart';
 
@@ -30,7 +30,7 @@ class MyAppDev extends StatelessWidget {
 
       home: Stack(
         children: [
-          AuthService.currentUser == null ? LoginPage() : DashboardPage(),
+          AuthService.currentUser == null ? DevLoginPage() : DashboardPage(),
 
           // 🔴 Banner DEV
           Positioned(

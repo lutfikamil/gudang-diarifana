@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/auth_service.dart';
 
 class UserManagementPage extends StatefulWidget {
+  const UserManagementPage({super.key});
   @override
   State<UserManagementPage> createState() => _UserManagementPageState();
 }

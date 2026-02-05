@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/firestore_service.dart';
 
 class BarangKeluarPage extends StatefulWidget {
+  const BarangKeluarPage({super.key});
   @override
   State<BarangKeluarPage> createState() => _BarangKeluarPageState();
 }
@@ -91,7 +92,7 @@ class _BarangKeluarPageState extends State<BarangKeluarPage> {
                         ),
                       ],
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

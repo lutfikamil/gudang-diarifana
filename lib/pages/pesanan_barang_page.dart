@@ -166,7 +166,7 @@ class _PesananBarangPageState extends State<PesananBarangPage> {
                               ),
                             ],
                           );
-                        }).toList(),
+                        }),
                       ],
                     ),
                   ),

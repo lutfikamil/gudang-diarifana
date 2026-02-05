@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/firestore_service.dart';
 
 class BarangMasukPage extends StatefulWidget {
+  const BarangMasukPage({super.key});
   @override
   State<BarangMasukPage> createState() => _BarangMasukPageState();
 }
@@ -86,7 +87,7 @@ class _BarangMasukPageState extends State<BarangMasukPage> {
                         ),
                       ],
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
@@ -176,7 +177,9 @@ class _BarangMasukPageState extends State<BarangMasukPage> {
 
                 jumlahCtrl.clear();
                 satuan = 'pcs';
-                Navigator.pop(context);
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               },
             ),
           ],

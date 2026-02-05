@@ -8,6 +8,7 @@ import '../utils/pdf_export.dart';
 import '../utils/date_range_helper.dart';
 
 class LaporanPage extends StatefulWidget {
+  const LaporanPage({super.key});
   @override
   State<LaporanPage> createState() => _LaporanPageState();
 }

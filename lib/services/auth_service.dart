@@ -72,6 +72,64 @@ class AuthService {
     _role = role;
   }
 
+  // ================= CREATE TENANT (CLIENT TRANSACTION) =================
+  /// Creates a tenant and links the current user as member with given [role].
+  /// This uses a Firestore transaction to ensure atomicity.
+  /// Requires the user to be logged in and email verified.
+  static Future<String> createTenantForCurrentUser({
+    required String tenantName,
+    String role = 'owner',
+    bool useUidAsTenantId = false,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User belum login');
+    if (!user.emailVerified) throw Exception('Email belum terverifikasi');
+
+    final uid = user.uid;
+
+    final tenantRef =
+        useUidAsTenantId
+            ? _db.collection('tenants').doc(uid)
+            : _db.collection('tenants').doc();
+
+    final userRef = _db.collection('users').doc(uid);
+    final memberRef = tenantRef.collection('members').doc(uid);
+
+    await _db.runTransaction((tx) async {
+      final tenantSnap = await tx.get(tenantRef);
+      if (tenantSnap.exists) {
+        // If tenant doc already exists and is owned by someone else, abort
+        final existingOwner = tenantSnap.data()?['ownerUid'];
+        if (existingOwner != null && existingOwner != uid) {
+          throw Exception('Tenant sudah ada dan tidak dapat dibuat ulang');
+        }
+      }
+
+      tx.set(tenantRef, {
+        'name': tenantName,
+        'ownerUid': uid,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      tx.set(userRef, {
+        'name': user.displayName ?? '',
+        'email': user.email,
+        'tenantId': tenantRef.id,
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      tx.set(memberRef, {
+        'role': role,
+        'joinedAt': FieldValue.serverTimestamp(),
+      });
+    });
+
+    // update local session
+    setSession(tenantId: tenantRef.id, role: role);
+
+    return tenantRef.id;
+  }
+
   // ================= CHECK ROLE =================
   static bool isOwner() {
     return _role == 'owner' || _role == 'admin';

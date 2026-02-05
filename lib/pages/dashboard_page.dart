@@ -11,6 +11,7 @@ import '../utils/role_helper.dart';
 import 'menu_kombinasi_page.dart';
 
 class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }

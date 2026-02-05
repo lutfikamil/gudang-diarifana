@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'pesanan_barang_page.dart';
 import 'pesanan_daftar_page.dart';
 import 'pesanan_selesai_page.dart';
-import 'menu_kombinasi_page.dart';
+//import 'menu_kombinasi_page.dart';
 
 class PesananPage extends StatelessWidget {
   const PesananPage({super.key});
@@ -14,7 +14,7 @@ class PesananPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            ElevatedButton.icon(
+            /* ElevatedButton.icon(
               icon: const Icon(Icons.restaurant_menu),
               label: const Text("Menu Makanan"),
               onPressed: () {
@@ -25,6 +25,7 @@ class PesananPage extends StatelessWidget {
               },
             ),
             const SizedBox(height: 12),
+            */
             ElevatedButton.icon(
               icon: const Icon(Icons.add_shopping_cart),
               label: const Text("Pesan Barang"),
@@ -38,7 +39,7 @@ class PesananPage extends StatelessWidget {
             const SizedBox(height: 12),
             ElevatedButton.icon(
               icon: const Icon(Icons.list),
-              label: const Text("Daftar Pesanan (Berlangsung)"),
+              label: const Text("Daftar Pesanan"),
               onPressed: () {
                 Navigator.push(
                   context,
