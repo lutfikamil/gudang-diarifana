@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 import '../../services/auth_service.dart';
 import '../pages/dashboard_page.dart';
 
@@ -66,9 +68,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 8),
             const Text(
-              "GUDANG SPPG"
-              "\n"
-              "DIARIFANA",
+              "GUDANG DIARIFANA",
               style: TextStyle(
                 fontSize: 20,
                 color: Color.fromARGB(255, 52, 116, 255),
@@ -128,6 +128,35 @@ class _LoginPageState extends State<LoginPage> {
               "Informasi: untuk test Email: admin@gudang.com \n Password: 123456",
               style: TextStyle(fontSize: 12, color: Colors.grey),
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                children: [
+                  const TextSpan(text: 'Created by '),
+                  TextSpan(
+                    text: 'lm-Digital',
+                    style: const TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () async {
+                            final url = Uri.parse('https://lm-digital.com');
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(
+                                url,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            }
+                          },
+                  ),
+                ],
+              ),
             ),
           ],
         ),

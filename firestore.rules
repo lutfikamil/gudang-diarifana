@@ -1,153 +1,103 @@
-// Firestore Security Rules untuk Multi-Tenant Architecture
-// File: firestore.rules
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-     // Helper: apakah request.auth.uid adalah member dari tenant
+
+    // ================= HELPERS =================
+    // Cek apakah user ada di tenant
     function isUserInTenant(tenantId) {
       return request.auth != null &&
         exists(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid));
     }
 
-    // Helper: apakah request.auth.uid memiliki role admin/owner di tenant
-    function isUserAdminInTenant(tenantId) {
-      return request.auth != null &&
-        get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role in ['admin', 'owner'];
+    // Ambil role user
+    function getUserRole(tenantId) {
+      return get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role;
     }
 
-    // Users collection: user boleh membuat/ubah/read dokumen profile mereka sendiri
+    // Cek apakah user termasuk salah satu role di allowedRoles
+    function hasRole(tenantId, allowedRoles) {
+      return request.auth != null &&
+        isUserInTenant(tenantId) &&
+        getUserRole(tenantId) in allowedRoles;
+    }
+
+    // ================= USERS =================
     match /users/{userId} {
       allow create: if request.auth != null && request.auth.uid == userId;
-      allow read, update: if request.auth != null && request.auth.uid == userId;
+      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Tenants: allow owner-first creation when ownerUid == authenticated uid
+    // ================= TENANTS =================
     match /tenants/{tenantId} {
-      allow create: if request.auth != null
-        && request.resource.data.ownerUid == request.auth.uid
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0;
+      allow create: if request.auth != null &&
+        request.resource.data.ownerUid == request.auth.uid &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() > 0;
 
       allow read: if isUserInTenant(tenantId);
-      allow update, delete: if isUserAdminInTenant(tenantId);
+      allow update, delete: if hasRole(tenantId, ['owner','admin']);
     }
 
-    // Members: allow user to create their own member doc (first join/owner creation)
-    match /tenants/{tenantId}/members/{memberId} {
-      allow create: if request.auth != null
-        && request.auth.uid == memberId
-        && request.resource.data.role is string;
-
-      allow read: if isUserInTenant(tenantId);
-      allow update, delete: if isUserAdminInTenant(tenantId);
-    }
-
-    // Tenant-scoped data: only accessible to tenant members; mutations must include tenantId match
-    match /tenants/{tenantId}/{collection=**}/{document=**} {
-      allow read: if isUserInTenant(tenantId);
-      allow create, update: if isUserInTenant(tenantId)
-        && request.resource.data.tenantId == tenantId;
-      allow delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
-    }
-    // ================= HELPER FUNCTIONS =================
-    
-    // Validasi user adalah member dari tenant
-    function isUserInTenant(tenantId) {
-      return exists(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid));
-    }
-    
-    // Validasi user adalah owner/admin dari tenant
-    function isUserAdminInTenant(tenantId) {
-      let userRole = get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role;
-      return userRole in ['admin', 'owner'];
-    }
-    match /tenants/{tenantId} {
-      allow create: if request.auth != null
-        && request.resource.data.ownerUid == request.auth.uid;
-      allow read: if isUserInTenant(tenantId);
-      allow update, delete: if isUserAdminInTenant(tenantId);
-    }
-    
+    // ================= MEMBERS =================
     match /tenants/{tenantId}/members/{memberId} {
       allow create: if request.auth != null && request.auth.uid == memberId;
       allow read: if isUserInTenant(tenantId);
-      allow update, delete: if isUserAdminInTenant(tenantId);
-    }
-    
-    match /users/{userId} {
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Update/delete: admin bisa, tapi tidak boleh mengubah owner
+      allow update, delete: if hasRole(tenantId, ['owner','admin'])
+        && !(resource.data.role == 'owner' && !(request.auth.uid == memberId));
     }
 
-    // ================= ROOT COLLECTIONS =================
-    
-    // Users collection - setiap user bisa read/write user mereka sendiri
-    match /users/{userId} {
-      allow read: if request.auth.uid == userId;
-      allow write: if request.auth.uid == userId;
-      allow create: if request.auth.uid != null;
+    // ================= FOLDER TERBATAS =================
+    // Contoh folder yang hanya bisa diakses admin, staff, kordinator
+    match /tenants/{tenantId}/folder_terbatas/{document=**} {
+      allow read, create, update: if hasRole(tenantId, ['owner','admin','staff','kordinator']);
+      allow delete: if hasRole(tenantId, ['owner','admin']);
     }
-    
-    // ================= TENANTS COLLECTION =================
-    
-    // Tenant metadata
-    match /tenants/{tenantId} {
-      allow read: if isUserInTenant(tenantId);
-      allow write: if isUserAdminInTenant(tenantId);
+
+    // ================= COLLECTIONS =================
+
+    // Barang
+    match /tenants/{tenantId}/barang/{docId} {
+      allow read: if hasRole(tenantId, ['owner','admin','staff','kordinator','customservice','user','suplayer']);
+      allow create, update, delete: if hasRole(tenantId, ['owner','admin','staff']);
     }
-    
-    // Tenant members subcollection
-    match /tenants/{tenantId}/members/{memberId} {
-      allow read: if isUserInTenant(tenantId);
-      allow write: if isUserAdminInTenant(tenantId);
-    }
-    
-    // ================= TENANT DATA COLLECTIONS =================
-    
-    // Barang collection - akses hanya untuk tenant members
-    match /tenants/{tenantId}/barang/{document=**} {
-      allow read: if isUserInTenant(tenantId);
-      allow create, update: if isUserInTenant(tenantId) && request.resource.data.tenantId == tenantId;
-      allow delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
-    }
-    
-    // Pesanan collection
+
+    // Pesanan
     match /tenants/{tenantId}/pesanan/{document=**} {
-      allow read: if isUserInTenant(tenantId);
-      allow create, update: if isUserInTenant(tenantId) && request.resource.data.tenantId == tenantId;
-      allow delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
+      allow read: if hasRole(tenantId, ['owner','admin','staff','kordinator','customservice','user','suplayer']);
+      allow create, update, delete: if hasRole(tenantId, ['owner','admin','staff']);
     }
-    
+
     // Barang Masuk
-    match /tenants/{tenantId}/barang_masuk/{document=**} {
-      allow read, create: if isUserInTenant(tenantId);
-      allow update, delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
+    match /tenants/{tenantId}/barang_masuk/{docId} {
+      allow read, create, update, delete: if hasRole(tenantId, ['owner','admin','staff']);
     }
-    
+
     // Barang Keluar
-    match /tenants/{tenantId}/barang_keluar/{document=**} {
-      allow read, create: if isUserInTenant(tenantId);
-      allow update, delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
+    match /tenants/{tenantId}/barang_keluar/{docId} {
+      allow read, create: if hasRole(tenantId, ['owner','admin','staff','kordinator']);
+      allow update, delete: if hasRole(tenantId, ['owner','admin','staff']);
     }
-    
+
     // Menu Kombinasi
-    match /tenants/{tenantId}/menu_kombinasi/{document=**} {
-      allow read: if isUserInTenant(tenantId);
-      allow create, update: if isUserInTenant(tenantId) && request.resource.data.tenantId == tenantId;
-      allow delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
+    match /tenants/{tenantId}/menu_kombinasi/{docId} {
+      allow read: if hasRole(tenantId, ['owner','admin','staff','kordinator','customservice','user']);
+      allow create, update: if hasRole(tenantId, ['owner','admin','staff']);
+      allow delete: if hasRole(tenantId, ['owner','admin','staff']);
     }
-    
+
     // Kategori Menu Kombinasi
-    match /tenants/{tenantId}/kategori_menu_kombinasi/{document=**} {
-      allow read: if isUserInTenant(tenantId);
-      allow create, update: if isUserInTenant(tenantId) && request.resource.data.tenantId == tenantId;
-      allow delete: if isUserAdminInTenant(tenantId) && resource.data.tenantId == tenantId;
+    match /tenants/{tenantId}/kategori_menu_kombinasi/{docId} {
+      allow read: if hasRole(tenantId, ['owner','admin','staff','kordinator','customservice','user']);
+      allow create, update: if hasRole(tenantId, ['owner','admin','staff']);
+      allow delete: if hasRole(tenantId, ['owner','admin','staff']);
     }
-    
-    // Deny all other access
+
+    // ================= DENY ALL OTHER ACCESS =================
     match /{document=**} {
       allow read, write: if false;
     }
+
   }
 }

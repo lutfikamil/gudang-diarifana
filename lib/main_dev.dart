@@ -13,7 +13,7 @@ void main() async {
   await Firebase.initializeApp(options: DevFirebaseOptions.currentPlatform);
 
   await initializeDateFormatting('id_ID', null);
-
+  await AuthService.restoreSession();
   runApp(const MyAppDev());
 }
 

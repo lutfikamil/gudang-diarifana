@@ -1,5 +1,51 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"gudang-sppg-dev","appId":"1:642699036603:android:44449ced9412afb846269e","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"gudang-sppg-dev","configurations":{"android":"1:642699036603:android:44449ced9412afb846269e","web":"1:642699036603:web:941c44dbf016421646269e","windows":"1:642699036603:web:f10abd505d464a0446269e"}}}}},
- "firestore": {
-		"rules": "firestore.rules"
-	}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "gudang-sppg-dev",
+          "appId": "1:642699036603:android:44449ced9412afb846269e",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "gudang-sppg-dev",
+          "configurations": {
+            "android": "1:642699036603:android:44449ced9412afb846269e",
+            "web": "1:642699036603:web:941c44dbf016421646269e",
+            "windows": "1:642699036603:web:f10abd505d464a0446269e"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-southeast2",
+    "rules": "firestore.rules",
+    "indexes": "firebase.json"
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "emulators": {
+    "dataconnect": {
+      "dataDir": "dataconnect/.dataconnect/pgliteData"
+    }
+  },
+  "dataconnect": {
+    "source": "dataconnect"
+  }
 }

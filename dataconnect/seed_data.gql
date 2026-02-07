@@ -1,0 +1,26 @@
+mutation CreateSeedData @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public as it is only used for seeding data.") @transaction {
+  # Example: Insert data into a "Product" table
+  product_insertMany(data: [
+    {
+      id: "1",
+      name: "Example Product 1",
+      description: "This is the first example product."
+    },
+    {
+      id: "2",
+      name: "Example Product 2",
+      description: "This is the second example product."
+    }
+  ])
+  # Example: Insert data into a "Category" table
+  category_insertMany(data: [
+    {
+      id: "A",
+      name: "Category A"
+    },
+    {
+      id: "B",
+      name: "Category B"
+    }
+  ])
+}

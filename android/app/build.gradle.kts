@@ -19,7 +19,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
@@ -58,14 +58,13 @@ android {
     }
 }
 dependencies {
-  implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
-      implementation("com.google.firebase:firebase-auth")
+    implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
+    implementation("com.google.firebase:firebase-auth")
 
     // Also add the dependencies for the Credential Manager libraries and specify their versions
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
-  implementation("com.google.firebase:firebase-auth")
 }
 
 flutter {

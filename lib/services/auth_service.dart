@@ -35,7 +35,61 @@ class AuthService {
     await _loadTenantSession();
   }
 
+  // ================= LOGIN WITH TENANT ID (FOR MEMBER ACCOUNTS) =================
+  /// Sign in and verify the signed-in user belongs to the provided tenantId.
+  static Future<void> loginWithTenant({
+    required String email,
+    required String password,
+    required String tenantId,
+  }) async {
+    final cred = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    final user = cred.user;
+    if (user == null) throw Exception('User belum login');
+
+    // load user's profile doc and check tenant
+    final uid = user.uid;
+    final userDoc = await _db.collection('users').doc(uid).get();
+    if (!userDoc.exists) {
+      await _auth.signOut();
+      throw Exception('Data user tidak ditemukan');
+    }
+
+    final userTenant = userDoc.data()?['tenantId'];
+    if (userTenant != tenantId) {
+      await _auth.signOut();
+      throw Exception('Tenant ID tidak cocok');
+    }
+
+    // ensure member exists in tenant
+    final memberDoc =
+        await _db
+            .collection('tenants')
+            .doc(tenantId)
+            .collection('members')
+            .doc(uid)
+            .get();
+    if (!memberDoc.exists) {
+      await _auth.signOut();
+      throw Exception('User bukan member tenant');
+    }
+
+    // set session
+    _tenantId = tenantId;
+    _role = memberDoc.data()?['role'];
+  }
+
   // ================= LOAD TENANT SESSION =================
+  static Future<void> restoreSession() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    await _loadTenantSession();
+  }
+
   static Future<void> _loadTenantSession() async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User belum login');

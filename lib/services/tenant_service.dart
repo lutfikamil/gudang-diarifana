@@ -18,7 +18,7 @@ class TenantService {
       'status': 'active',
     });
 
-    await tenantRef.collection('users').doc(ownerUid).set({
+    await tenantRef.collection('members').doc(ownerUid).set({
       'role': 'owner',
       'email': ownerEmail,
       'joinedAt': FieldValue.serverTimestamp(),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 import '../../services/auth_service.dart';
 import '../pages/dashboard_page.dart';
 import 'register_page_dev.dart';
@@ -12,6 +14,7 @@ class DevLoginPage extends StatefulWidget {
 }
 
 class _DevLoginPageState extends State<DevLoginPage> {
+  final tenantCtrl = TextEditingController();
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
   bool loading = false;
@@ -29,8 +32,14 @@ class _DevLoginPageState extends State<DevLoginPage> {
   }
 
   bool _validate() {
+    final tenantId = tenantCtrl.text.trim();
     final email = emailCtrl.text.trim();
     final pass = passCtrl.text.trim();
+
+    if (tenantId.isEmpty) {
+      _showError("Tenant ID wajib diisi");
+      return false;
+    }
 
     if (email.isEmpty || pass.isEmpty) {
       _showError("Email dan password wajib diisi");
@@ -74,6 +83,10 @@ class _DevLoginPageState extends State<DevLoginPage> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
+            TextField(
+              controller: tenantCtrl,
+              decoration: InputDecoration(labelText: "Tenant ID"),
+            ),
             TextField(
               controller: emailCtrl,
               keyboardType: TextInputType.emailAddress,
@@ -147,6 +160,35 @@ class _DevLoginPageState extends State<DevLoginPage> {
                 );
               },
               child: const Text('Belum punya akun? Daftar di sini'),
+            ),
+            const SizedBox(height: 20),
+
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                children: [
+                  const TextSpan(text: 'Created by '),
+                  TextSpan(
+                    text: 'lm-Digital',
+                    style: const TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () async {
+                            final url = Uri.parse('https://lm-digital.com');
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(
+                                url,
+                                mode: LaunchMode.externalApplication,
+                              );
+                            }
+                          },
+                  ),
+                ],
+              ),
             ),
           ],
         ),

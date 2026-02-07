@@ -221,18 +221,6 @@ class _LaporanPageState extends State<LaporanPage> {
               tooltip: 'Pilih Bulan',
               onPressed: pilihBulan,
             ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'excel') exportKeExcel();
-              if (value == 'pdf') exportKePdf();
-            },
-            itemBuilder:
-                (context) => const [
-                  PopupMenuItem(value: 'excel', child: Text('Export Excel')),
-                  PopupMenuItem(value: 'pdf', child: Text('Export PDF')),
-                ],
-            enabled: laporan.isNotEmpty,
-          ),
         ],
       ),
       body: Column(

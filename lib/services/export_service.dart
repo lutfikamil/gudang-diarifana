@@ -3,15 +3,31 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:gudang_app/services/export_helper.dart' as export_helper;
+import 'export_helper.dart' as export_helper;
 import 'package:excel/excel.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'auth_service.dart';
 
 class ExportService {
   static final _db = FirebaseFirestore.instance;
 
   // ================= EXPORT STOK BARANG KE EXCEL =================
   static Future<void> exportStokBarangToExcel() async {
-    final snapshot = await _db.collection('barang').get();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw Exception("Belum login");
+
+    final tenantId = await AuthService.tenantId;
+
+    if (tenantId == null) {
+      throw Exception("Tenant tidak ditemukan");
+    }
+
+    final snapshot =
+        await _db
+            .collection('tenants')
+            .doc(tenantId)
+            .collection('barang')
+            .get();
 
     // Buat Excel workbook
     var excel = Excel.createExcel();

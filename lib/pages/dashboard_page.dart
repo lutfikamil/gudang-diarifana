@@ -41,8 +41,37 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Dashboard (${role!.toUpperCase()})"),
+        title: Row(
+          children: [
+            const Text('Dashboard'),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                AuthService.role?.toUpperCase() ?? '',
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
         actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Center(
+              child: Text(
+                AuthService.currentUser?.displayName ?? 'User',
+                style: const TextStyle(fontSize: 13),
+              ),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
