@@ -1,0 +1,36 @@
+name: Build Android APK (Flutter)
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.38.0"
+          channel: stable
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build Debug APK (dev flavor)
+        run: flutter build apk --flavor dev --debug
+
+      - name: List APK output (debug)
+        run: ls -R build/app/outputs/flutter-apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-dev-debug
+          path: build/app/outputs/flutter-apk/app-dev-debug.apk
